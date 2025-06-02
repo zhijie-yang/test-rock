@@ -23,17 +23,28 @@ jobs:
             echo 'arch-map={"amd64":["ubuntu-24.04"],"arm64":["ubuntu-24.04-arm"]}' >> $GITHUB_OUTPUT
           fi
 
+  parse-build-trigger:
+    runs-on: ubuntu-latest
+    outputs:
+      build-matrix: ${{ steps.parse-build-trigger.outputs.build-matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: parse-build-trigger
+        uses: canonical/oci-factory/.github/actions/parse-build-trigger@ROCKS-2186/user-defined-registry
+        with:
+          build-trigger-file: "image.yaml"
+
   build:
-    needs: [get-runners, tag-rocks]
+    needs: [get-runners, tag-rocks, parse-build-trigger]
     strategy:
       matrix:
-        rock: ${{ fromJSON(needs.tag-rocks.outputs.json_result) }}
+        rock: ${{ fromJSON(needs.parse-build-trigger.outputs.build-matrix) }}
     uses: canonical/oci-factory/.github/workflows/Build-Rock.yaml@main
     with:
       rock-repo: ${{ github.repository }}
       rock-repo-commit: ${{ github.ref }}
-      rockfile-directory: ${{ matrix.rock.location }}
-      oci-archive-name: ${{ matrix.rock.name }}_${{ matrix.rock.tag }}
+      rockfile-directory: ${{ matrix.location }}
+      oci-archive-name: ${{ matrix.name }}_${{ matrix.tag }}
       arch-map: ${{ needs.get-runners.outputs.arch-map }}
 
   test:

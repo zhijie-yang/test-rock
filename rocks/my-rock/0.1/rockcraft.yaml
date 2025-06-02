@@ -17,3 +17,5 @@ platforms: # the platforms this rock should be built on and run on
 parts:
     my-part:
         plugin: nil
+        stage-packages:
+          - hello

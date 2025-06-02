@@ -1,0 +1,11 @@
+version: 1
+build:
+  # Push to docker hub as `rockcrafters/mock-rock:1-22.04
+  - directory: rocks/my-rock/0.1
+    tag: 0.1-24.04
+    deploy:
+      repositories:
+        - registry: hub.docker.com
+          namespace: rockcrafters # This field should never be 'ubuntu'
+      risks:
+        - edge
