@@ -46,8 +46,7 @@ jobs:
   build:
     needs: [get-runners, tag-rocks, parse-build-trigger]
     strategy:
-      matrix:
-        rock: ${{ fromJSON(needs.parse-build-trigger.outputs.build-matrix) }}
+      matrix: ${{ fromJSON(needs.parse-build-trigger.outputs.build-matrix) }}
     uses: canonical/oci-factory/.github/workflows/Build-Rock.yaml@main
     with:
       rock-repo: ${{ github.repository }}
