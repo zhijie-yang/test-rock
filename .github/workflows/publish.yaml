@@ -36,6 +36,8 @@ jobs:
           fetch-depth: 1
           ref: ROCKS-2186/user-defined-registry
           path: oci-factory
+      - name: Install Python dependencies
+        run: python3 -m pip install -r oci-factory/image/requirements.txt
       - id: parse-build-trigger
         run: |
           python3 -m oci-factory.src.image.parse_image_build_trigger \
