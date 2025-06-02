@@ -37,7 +37,7 @@ jobs:
           ref: ROCKS-2186/user-defined-registry
           path: oci-factory
       - name: Install Python dependencies
-        run: python3 -m pip install -r oci-factory/image/requirements.txt
+        run: python3 -m pip install -r oci-factory/src/image/requirements.txt
       - id: parse-build-trigger
         run: |
           python3 -m oci-factory.src.image.parse_image_build_trigger \
