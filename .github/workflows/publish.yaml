@@ -29,10 +29,17 @@ jobs:
       build-matrix: ${{ steps.parse-build-trigger.outputs.build-matrix }}
     steps:
       - uses: actions/checkout@v4
-      - id: parse-build-trigger
-        uses: canonical/oci-factory/.github/actions/parse-build-trigger@ROCKS-2186/user-defined-registry
+      - name: Checkout OCI Factory
+        uses: actions/checkout@v4
         with:
-          build-trigger-file: "image.yaml"
+          repository: canonical/oci-factory
+          fetch-depth: 1
+          ref: ROCKS-2186/user-defined-registry
+          path: oci-factory
+      - id: parse-build-trigger
+        run: |
+          python3 -m oci-factory.src.image.parse_image_build_trigger \
+            --image-trigger image.yaml
 
   build:
     needs: [get-runners, tag-rocks, parse-build-trigger]
