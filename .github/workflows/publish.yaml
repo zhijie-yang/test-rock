@@ -88,7 +88,7 @@ jobs:
         with:
           artifact_name: ${{ matrix.artifact-name }}
           tags: ${{ matrix.tag }}
-          name: ${{ matrix.image-name }}
+          name: ${{ matrix.namespace }}/${{ matrix.image-name }}
           registry: ${{ matrix.registry }}
           username: ${{ secrets[format('{0}USR', matrix.secret-prefix)] }}
           password: ${{ secrets[format('{0}PSW', matrix.secret-prefix)] }}
