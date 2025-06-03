@@ -27,6 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       build-matrix: ${{ steps.parse-build-trigger.outputs.build-matrix }}
+      publish-matrix: ${{ steps.parse-build-trigger.outputs.publish-matrix }}
     steps:
       - uses: actions/checkout@v4
       - name: Checkout OCI Factory
@@ -44,7 +45,7 @@ jobs:
             --image-trigger image.yaml
 
   build:
-    needs: [get-runners, tag-rocks, parse-build-trigger]
+    needs: [get-runners, parse-build-trigger]
     strategy:
       matrix: ${{ fromJSON(needs.parse-build-trigger.outputs.build-matrix) }}
     uses: canonical/oci-factory/.github/workflows/Build-Rock.yaml@main
@@ -52,23 +53,21 @@ jobs:
       rock-repo: ${{ github.repository }}
       rock-repo-commit: ${{ github.ref }}
       rockfile-directory: ${{ matrix.location }}
-      oci-archive-name: ${{ matrix.name }}_${{ matrix.tag }}
+      oci-archive-name: ${{ matrix.artifact-name }}
       arch-map: ${{ needs.get-runners.outputs.arch-map }}
 
   test:
-    needs: [tag-rocks, build]
+    needs: [build, parse-build-trigger]
     strategy:
-      matrix:
-        rock: ${{ fromJSON(needs.tag-rocks.outputs.json_result) }}
+      matrix: ${{ fromJSON(needs.parse-build-trigger.outputs.build-matrix) }}
     uses: canonical/oci-factory/.github/workflows/Test-Rock.yaml@fix-test-oci-compliance
     with:
-      oci-archive-name: ${{ matrix.rock.name }}_${{ matrix.rock.tag }}
+      oci-archive-name: ${{ matrix.artifact-name }}
 
   upload:
-    needs: [tag-rocks, test]
+    needs: [test, parse-build-trigger]
     strategy:
-      matrix:
-        rock: ${{ fromJSON(needs.tag-rocks.outputs.json_result) }}
+      matrix: ${{ fromJSON(needs.parse-build-trigger.outputs.publish-matrix) }}
     runs-on: ubuntu-latest
     permissions:
       packages: write
@@ -77,9 +76,20 @@ jobs:
       - name: Upload Rock to GHCR
         uses: canonical/oci-factory/.github/actions/upload-rock@main
         with:
-          artifact_name: ${{ matrix.rock.name }}_${{ matrix.rock.tag }}
-          tags: ${{ matrix.rock.tag }}
+          artifact_name: ${{ matrix.name }}_${{ matrix.tag }}
+          tags: ${{ matrix.tag }}
           name: ${{ github.repository }}
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push to registries
+        uses: canonical/oci-factory/.github/actions/upload-rock@main
+        with:
+          artifact_name: ${{ matrix.name }}_${{ matrix.tag }}
+          tags: ${{ matrix.tag }}
+          name: ${{ matrix.image-name }}
+          registry: ${{ matrix.registry }}
+          username: ${{ secrets[format('{0}USR', matrix.secret-prefix)] }}
+          password: ${{ secrets[format('{0}PSW', matrix.secret-prefix)] }}
+        

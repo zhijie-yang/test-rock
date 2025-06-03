@@ -5,7 +5,7 @@ build:
     tag: 0.1-24.04
     deploy:
       repositories:
-        - registry: hub.docker.com
-          namespace: rockcrafters # This field should never be 'ubuntu'
+        - registry: docker.io
+          namespace: yangzhijie1
       risks:
         - edge
