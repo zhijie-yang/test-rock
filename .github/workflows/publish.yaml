@@ -77,7 +77,7 @@ jobs:
         uses: canonical/oci-factory/.github/actions/upload-rock@main
         with:
           artifact_name: ${{ matrix.artifact-name }}
-          tags: ${{ matrix.tag }}
+          tags: ${{ matrix.tags }}
           name: ${{ github.repository }}
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -87,7 +87,7 @@ jobs:
         uses: canonical/oci-factory/.github/actions/upload-rock@main
         with:
           artifact_name: ${{ matrix.artifact-name }}
-          tags: ${{ matrix.tag }}
+          tags: ${{ matrix.tags }}
           name: ${{ matrix.namespace }}/${{ matrix.image-name }}
           registry: ${{ matrix.registry }}
           username: ${{ secrets[format('{0}USR', matrix.secret-prefix)] }}
