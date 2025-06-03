@@ -76,7 +76,7 @@ jobs:
       - name: Upload Rock to GHCR
         uses: canonical/oci-factory/.github/actions/upload-rock@main
         with:
-          artifact_name: ${{ matrix.name }}_${{ matrix.tag }}
+          artifact_name: ${{ matrix.artifact-name }}
           tags: ${{ matrix.tag }}
           name: ${{ github.repository }}
           registry: ghcr.io
@@ -86,7 +86,7 @@ jobs:
       - name: Push to registries
         uses: canonical/oci-factory/.github/actions/upload-rock@main
         with:
-          artifact_name: ${{ matrix.name }}_${{ matrix.tag }}
+          artifact_name: ${{ matrix.artifact-name }}
           tags: ${{ matrix.tag }}
           name: ${{ matrix.image-name }}
           registry: ${{ matrix.registry }}
