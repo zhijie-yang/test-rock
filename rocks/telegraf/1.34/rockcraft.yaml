@@ -1,0 +1,60 @@
+name: telegraf-rock
+# see https://documentation.ubuntu.com/rockcraft/en/latest/explanation/bases/
+# for more information about bases and using 'bare' bases for chiselled rocks
+base: bare
+build-base: ubuntu@24.04 # the base environment for this rock
+version: '1.34' # just for humans. Semantic versioning is recommended
+summary: Single-line elevator pitch for your amazing rock # 79 char long summary
+description: |
+  This is telegraf-rock's description. You have a paragraph or two to tell the
+  most important story about it. Keep it under 100 words though,
+  we live in tweetspace and your description wants to look good in the
+  container registries out there.
+platforms: # the platforms this rock should be built on and run on
+  amd64:
+  arm64:
+run-user: _daemon_
+
+parts:
+  deps:
+    plugin: nil
+    stage-packages:
+      - iputils-ping
+      - snmp
+      - procps
+      - lm-sensors
+      - libcap2-bin
+
+  telegraf:
+    plugin: go
+    source: https://github.com/influxdata/telegraf.git
+    source-tag: 'v1.34.2'
+    source-depth: 1
+    build-snaps:
+      - go/1.24/stable
+    build-packages:
+      - make
+    override-build: |
+      make build
+      make config
+      install -D -m755 telegraf ${CRAFT_PART_INSTALL}/bin/telegraf
+      mkdir -pv ${CRAFT_PART_INSTALL}/etc/telegraf/telegraf.d
+      cp -fv etc/telegraf.conf ${CRAFT_PART_INSTALL}/etc/telegraf/telegraf.conf.sample
+    stage:
+      - bin/telegraf
+      - etc/telegraf/telegraf.conf.sample
+      - etc/telegraf/telegraf.d
+
+  entrypoint:
+    plugin: dump
+    source: ./scripts
+
+services:
+  telegraf:
+    user: _daemon_
+    group: _daemon_
+    override: replace
+    command: /entrypoint.sh
+
+
+      
